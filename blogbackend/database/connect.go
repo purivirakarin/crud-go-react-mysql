@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/purivirakarin/blogbackend/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -24,4 +25,7 @@ func Connect() {
 		log.Println("Connect successfully")
 	}
 	DB = database
+	database.AutoMigrate(
+		&models.User{},
+	)
 }
