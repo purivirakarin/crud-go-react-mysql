@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/purivirakarin/blogbackend/database"
 	"github.com/purivirakarin/blogbackend/models"
+	"github.com/purivirakarin/blogbackend/util"
 )
 
 func validateEmail(email string) bool {
@@ -74,5 +77,28 @@ func Login(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"message": "email address does not exist, kindly create an account",
 		})
+	} 
+	if err := user.ComparePassword(data["password"]); err != nil {
+		c.Status(400)
+		return c.JSON(fiber.Map{
+			"message": "incorrect password",
+		})
 	}
+	token, err := util.GenerateJwt(strconv.Itoa(int(user.Id)), )
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError)
+		return nil
+	}
+
+	cookie := fiber.Cookie{
+		Name: "jwt",
+		Value: token,
+		Expires: time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+	return c.JSON(fiber.Map{
+		"message": "you have succesfully logined",
+		"user": user,
+	})
 } 
