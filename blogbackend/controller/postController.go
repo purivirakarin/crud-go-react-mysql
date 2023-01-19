@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +26,7 @@ func CreatePost(c *fiber.Ctx) error {
 }
 
 func AllPost(c *fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page","1"))
+	page, _ := strconv.Atoi(c.Query("page", "1"))
 	limit := 5
 	offset := (page - 1) * limit
 	var total int64
@@ -37,9 +36,18 @@ func AllPost(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"data": getblog,
 		"meta": fiber.Map{
-			"total": total,
-			"page": page,
-			"last_page": math.Ceil(float64(int(total)/limit)),
+			"total":     total,
+			"page":      page,
+			"last_page": (float64(int(total) / limit)),
 		},
+	})
+}
+
+func DetailPost(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	var blogpost models.Blog
+	database.DB.Where("id=?", id).Preload("User").First(&blogpost)
+	return c.JSON(fiber.Map{
+		"data": blogpost,
 	})
 }
