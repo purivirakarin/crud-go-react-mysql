@@ -30,7 +30,7 @@ func AllPost(c *fiber.Ctx) error {
 	limit := 5
 	offset := (page - 1) * limit
 	var total int64
-	var getblog models.Blog
+	var getblog []models.Blog
 	database.DB.Preload("User").Offset(offset).Limit(limit).Find(&getblog)
 	database.DB.Model(&models.Blog{}).Count(&total)
 	return c.JSON(fiber.Map{
@@ -49,5 +49,20 @@ func DetailPost(c *fiber.Ctx) error {
 	database.DB.Where("id=?", id).Preload("User").First(&blogpost)
 	return c.JSON(fiber.Map{
 		"data": blogpost,
+	})
+}
+
+func UpdatePost(c *fiber.Ctx) error {
+	id, _ := strconv.Atoi(c.Params("id"))
+	blog := models.Blog{
+		Id: uint(id),
+	}
+	if err := c.BodyParser(&blog); err != nil {
+		fmt.Println("Unable to parse body")
+	}
+	database.DB.Model(&blog).Updates(blog)
+	return c.JSON(fiber.Map{
+		"message": "Post updated successfully",
+		"data":    blog,
 	})
 }
